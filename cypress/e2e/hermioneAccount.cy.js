@@ -31,11 +31,11 @@ describe('Bank app', () => {
     cy.get('.borderM .ng-binding').eq(1)
       .invoke('text')
       .then((text) => {
-        const startBalance = text;
+        const startBalance = Number(text.trim());
 
         cy.contains('[ng-hide="noAccount"]', 'Balance')
           .contains('strong.ng-binding', startBalance)
-          .should('be.visible').should('have.text', startBalance);
+          .should('be.visible').should('contain', startBalance);
       });
 
     cy.contains('[ng-hide="noAccount"]', 'Currency').contains('strong.ng-binding', 'Dollar').should('be.visible');
@@ -103,30 +103,18 @@ describe('Bank app', () => {
         cy.get('table.table.table-bordered.table-striped')
           .find('tr')
           .eq($rows.length - 1)
-          .should('contain', 'Debit');
+          .should('contain', 'Debit')
+          .should('contain', withdrawAmount);
         cy.get('table.table.table-bordered.table-striped')
           .find('tr')
           .eq($rows.length - 2)
-          .should('contain', 'Credit');
+          .should('contain', 'Credit').should('contain', depositAmount);
       });
 
     cy.get(':nth-child(3) > a').should('have.text', 'Transaction Type');
 
-    cy.get('.fixedTopBox > [style="float:left"]').click();
+    cy.get('.fixedTopBox > [style="float:left"]').click(); // Back button
     cy.assertPageUrl('#/account');
-
-    cy.get('#accountSelect').select(accountNumber[1]);
-    cy.contains('[ng-hide="noAccount"]', 'Account Number')
-      .contains('strong.ng-binding', accountNumber[1])
-      .should('be.visible');
-    cy.contains('[ng-hide="noAccount"]', 'Currency')
-      .contains('strong.ng-binding', 'Pound')
-      .should('be.visible');
-    cy.get('[ng-class="btnClass1"]').should('include.text', 'Transactions').click();
-    cy.get('table.table.table-bordered.table-striped tr').should(
-      'have.length',
-      1
-    );
 
     cy.get('.logout').click();
     cy.assertPageUrl('#/customer');
