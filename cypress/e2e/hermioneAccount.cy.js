@@ -3,16 +3,16 @@
 /* eslint-disable max-len */
 import { faker } from '@faker-js/faker';
 /// <reference types='cypress' />
-import { getBalance } from '../support/generateUser.js';
+
 describe('Bank app', () => {
-  // const balance = 0;
   const depositAmount = `${faker.number.int({ min: 500, max: 1000 })}`;
   const withdrawAmount = `${faker.number.int({ min: 50, max: 500 })}`;
-  // let labelText;
+
   const user = 'Hermoine Granger';
   const accountNumber = ['1001', '1002', '1003'];
   before(() => {
     cy.visit('/');
+    // const currentDate = new Date();
   });
 
   it('should provide the ability to work with Hermione\'s bank account', () => {
@@ -27,14 +27,15 @@ describe('Bank app', () => {
       .contains('strong.ng-binding', accountNumber[0])
       .should('be.visible');
 
-    cy.get('.borderM > :nth-child(3) > :nth-child(2)')
+    // cy.get('.borderM > :nth-child(3) > :nth-child(2)')
+    cy.get('.borderM .ng-binding').eq(1)
       .invoke('text')
       .then((text) => {
-        const startBalance = Number(text.trim());
-        cy.log(startBalance);
+        const startBalance = text;
+
         cy.contains('[ng-hide="noAccount"]', 'Balance')
           .contains('strong.ng-binding', startBalance)
-          .should('be.visible').should('have.text', startBalance.toString());
+          .should('be.visible').should('have.text', startBalance);
       });
 
     cy.contains('[ng-hide="noAccount"]', 'Currency').contains('strong.ng-binding', 'Dollar').should('be.visible');
@@ -60,15 +61,6 @@ describe('Bank app', () => {
 
     cy.get('[ng-show="message"]').should('contain', 'Deposit Successful');
     cy.contains('[ng-hide="noAccount"]', 'Balance').should('be.visible');
-
-    /* cy.get(".borderM > :nth-child(3) > :nth-child(2)").as("myInputField");
-    // Later in the test
-    cy.get("@myInputField").then(($input) => {
-      const value = $input.val();
-      cy.log(`Value from alias: ${value}`);
-    }); */
-
-    // Example: Get input value and store in a const
 
     cy.get('[ng-click="withdrawl()"]').click();
     cy.contains('[type="submit"]', 'Withdraw').should('be.visible');
@@ -97,12 +89,29 @@ describe('Bank app', () => {
 
     cy.get('[ng-class="btnClass1"]').should('include.text', 'Transactions').click();
     cy.assertPageUrl('#/listTx');
+
+    cy.get('table.table.table-bordered.table-striped').should('be.visible');
+    cy.get(':nth-child(1) > a').should('include.text', 'Date-Time');
+    // cy.get('thead > tr > :nth-child(1)').click();
     cy.get(':nth-child(2) > a').should('have.text', 'Amount');
 
-    cy.get('table.table.table-bordered.table-striped tr').should('have.length.greaterThan', 1);
+    // cy.get('table.table.table-bordered.table-striped tr').should('have.length.greaterThan', 1);
+    // cy.get(":nth-child(1) > a").should("include.text", "Date-Time").click();
+    cy.get('table.table.table-bordered.table-striped tr')
+      .should('have.length.greaterThan', 1)
+      .then(($rows) => {
+        cy.get('table.table.table-bordered.table-striped')
+          .find('tr')
+          .eq($rows.length - 1)
+          .should('contain', 'Debit');
+        cy.get('table.table.table-bordered.table-striped')
+          .find('tr')
+          .eq($rows.length - 2)
+          .should('contain', 'Credit');
+      });
 
     cy.get(':nth-child(3) > a').should('have.text', 'Transaction Type');
-    cy.get(':nth-child(1) > a').should('include.text', 'Date-Time');
+
     cy.get('.fixedTopBox > [style="float:left"]').click();
     cy.assertPageUrl('#/account');
 
